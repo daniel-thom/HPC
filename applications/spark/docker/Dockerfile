@@ -23,7 +23,8 @@ RUN apt-get update \
     && apt-get install -y openssh-client dropbear locales \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install r r-base r-tidyverse r-sparklyr r-data.table
+RUN pip install r r-base r-tidyverse r-sparklyr r-data.table r-here r-janitor r-skimr
+# or should this be conda install -c conda-forge r r-base r-tidyverse r-sparklyr r-data.table r-here r-janitor r-skimr
 
 # This prevents bash warnings on Eagle.
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
