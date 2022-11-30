@@ -10,7 +10,8 @@ convert the Docker image to Singularity.
 
 A Singularity image with Spark 3.3 and Python 3.9 is stored on Eagle at
 `/scratch/dthom/containers/spark.sif`. This image includes `jupyter` to empower workflows in
-notebooks.
+notebooks. Additionally, a Singularity image with Spark 3.3 and R 4.0.4 is stored on Eagle at
+`/scratch/dthom/containers/spark-r.sif`.
 
 ## Setup
 1. Clone the repository:
@@ -157,6 +158,11 @@ this text into a cell.
 ```
 from pyspark.sql import SparkSession
 spark = SparkSession.builder.appName("my_session").getOrCreate()
+
+```
+#### Interactive R session
+```
+singularity run instance://spark R
 ```
 
 
