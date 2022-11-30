@@ -89,25 +89,23 @@ If you need to mount other directories then you will need to customize them or c
 
 ### Manual mode
 
+1. Allocate nodes however you'd like (`salloc`, `sbatch`, `srun`).
 **Note**: The best way to test this functionality is with an interactive session on bigmem nodes
 in the debug partition.
-
 Example command:
 ```
 $ salloc -t 01:00:00 -N2 --account=<your-account> --partition=debug --mem=730G
 ```
-
-1. Allocate nodes however you'd like (`salloc`, `sbatch`, `srun`).
 2. Login to the first node if not already there.
 3. Optional: Run `configure_spark.sh` to apply settings based on actual compute node resources.
 4. Start the Spark cluster
 If you allocated the nodes with `salloc`:
 ```
-$ start_spark_cluster $SLURM_JOB_ID
+$ start_spark_cluster.sh $SLURM_JOB_ID
 ```
 If you allocated two jobs separately and ssh'd into a node:
 ```
-$ start_spark_cluster <SLURM_JOB_ID1> <SLURM_JOB_ID2>
+$ start_spark_cluster.sh <SLURM_JOB_ID1> <SLURM_JOB_ID2>
 ```
 
 5. Load the Singularity container if you want to run with its software. You can also run in your
