@@ -37,6 +37,7 @@ if [ ! -z ${NREL_CLUSTER} ] && [ ${NREL_CLUSTER} == "kestrel" ]; then
     export LUSTRE_BIND_MOUNTS=" -B /nopt:/nopt \
         -B /projects:/projects \
         -B /scratch:/scratch \
+        -B /datasets:/datasets \
         -B /kfs2:/kfs2 \
         -B /kfs3:/kfs3"
 else
