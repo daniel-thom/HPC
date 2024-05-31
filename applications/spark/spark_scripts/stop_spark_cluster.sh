@@ -47,8 +47,11 @@ fi
 # Workaround the issue by stopping the Spark worker inside stop_container.sh.
 # ${CONTAINER_EXEC} exec instance://${CONTAINER_NAME} stop-all.sh
 ${CONTAINER_EXEC} exec instance://${CONTAINER_NAME} stop-master.sh
+${SCRIPT_DIR}/stop_container.sh ${CONFIG_DIR}
 for node_name in $(cat ${CONFIG_DIR}/conf/workers); do
-    ssh ${USER}@${node_name} ${SCRIPT_DIR}/stop_container.sh ${CONFIG_DIR}
+    if [ ${node_name} != $(hostname) ]; then
+        ssh ${USER}@${node_name} ${SCRIPT_DIR}/stop_container.sh ${CONFIG_DIR}
+    fi
 done
 
 echo "Stopped all Spark processes and containers on all nodes."

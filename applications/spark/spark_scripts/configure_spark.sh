@@ -15,19 +15,21 @@ function config_executors()
     rm -f ${CONFIG_DIR}/conf/worker_memory ${CONFIG_DIR}/conf/worker_num_cpus
     num_workers=0
     for node_name in $(${SCRIPT_DIR}/get_node_names.sh ${SLURM_JOB_IDS[@]}); do
-        ssh ${USER}@${node_name} ${SCRIPT_DIR}/record_resources.sh ${CONFIG_DIR}
-        ret=$?
-        if [[ $ret -ne 0 ]]; then
-            error "Failed to record resources on the worker node ${node_name}: ${ret}"
+        if is_worker_node ${node_name}; then
+            ssh ${USER}@${node_name} ${SCRIPT_DIR}/record_resources.sh ${CONFIG_DIR}
+            ret=$?
+            if [ $ret -ne 0 ]; then
+                error "Failed to record resources on the worker node ${node_name}: ${ret}"
+            fi
+            (( num_workers += 1 ))
         fi
-        (( num_workers += 1 ))
     done
 
-    driver_mem=$(get_spark_driver_memory_gb)
+    node_memory_overhead_gb=$(get_node_memory_overhead_gb)
     memory_gb_by_node=()
     lowest_memory_gb=0
     for node_mem in $(cat ${CONFIG_DIR}/conf/worker_memory); do
-        mem=$(( ${node_mem} - ${driver_mem} - ${NODE_MEMORY_OVERHEAD_GB} ))
+        mem=$(( ${node_mem} - ${node_memory_overhead_gb} ))
         if [ ${lowest_memory_gb} -eq 0 ] || [ ${node_mem} -lt ${lowest_memory_gb} ]; then
             lowest_memory_gb=${mem}
         fi
