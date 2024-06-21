@@ -41,6 +41,10 @@ if [ $? -eq 0 ]; then
     # Checking for errors is not necessary.
     ${CONTAINER_EXEC} exec instance://${CONTAINER_NAME} stop-history-server.sh
 fi
+enable_thrift_server=$(get_config_variable "thrift_server")
+if [ ${enable_thrift_server} == "true" ]; then
+    exec_spark_process stop-thriftserver.sh
+fi
 
 # Something about the ssh configuration causes a warning when the Spark
 # scripts ssh to each worker node. It doesn't happen in our ssh commands.

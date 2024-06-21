@@ -1,12 +1,13 @@
 #!/bin/bash
 
 CONFIG_DIR=$(pwd)
-CONTAINER_PATH="/datasets/images/apache_spark/spark350_py311.sif"
+CONTAINER_PATH="/datasets/images/apache_spark/spark351_py312.sif"
 CONTAINER_NAME="spark"
 NODE_MEMORY_OVERHEAD_GB=5
 DRIVER_MEMORY_GB=1
 ENABLE_DYNAMIC_ALLOCATION=false
 ENABLE_HISTORY_SERVER=false
+ENABLE_THRIFT_SERVER=false
 # Many online docs say executors max out with 5 threads.
 EXECUTOR_CORES=5
 PARTITION_MULTIPLIER=1
@@ -32,6 +33,7 @@ Options:
   -e, --executor-cores INTEGER        Number of cores per executor. [Default: ${EXECUTOR_CORES}]
   -m, --partition-multiplier INTEGER  Set spark.sql.shuffle.partitions to number of
                                       cores multiplied by this value. [Default: ${PARTITION_MULTIPLIER}]
+  -t, --thrift-server TEXT            Enable the Thrift server to connect a SQL client. [Default: false]
 
 Example:
   $(basename $0) --driver-memory-gb 2
@@ -82,6 +84,10 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    -t|--thrift-server)
+      ENABLE_THRIFT_SERVER=true
+      shift
+      ;;
     -h|--help)
       echo "${USAGE}"
       exit 0
@@ -99,7 +105,13 @@ done
 
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 set -e
+create_flags=""
+if [ ${ENABLE_THRIFT_SERVER} = true ]; then
+    create_flags+=" -t"
+fi
+
 bash ${script_dir}/create_config.sh \
+    ${create_flags} \
     -C ${CONTAINER_NAME} \
     -c ${CONTAINER_PATH} \
     -d ${CONFIG_DIR} \

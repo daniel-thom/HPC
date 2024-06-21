@@ -59,6 +59,10 @@ function start_spark_processes()
     if [ $? -eq 0 ]; then
         exec_spark_process start-history-server.sh
     fi
+    enable_thrift_server=$(get_config_variable "thrift_server")
+    if [ ${enable_thrift_server} == "true" ]; then
+        exec_spark_process start-thriftserver.sh ${spark_cluster}
+    fi
     echo "Started Spark master processes on ${master_node}"
     if ! is_heterogeneous_slurm_job; then
         ${SCRIPT_DIR}/start_spark_worker.sh ${CONFIG_DIR} ${node_memory_overhead_gb} ${spark_cluster}
