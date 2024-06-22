@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CONFIG_DIR=$(pwd)
-DRIVER_MEMORY_GB=1
+DRIVER_MEMORY_GB=10
 ENABLE_DYNAMIC_ALLOCATION=false
 ENABLE_HISTORY_SERVER=false
 # Many online docs say executors max out with 5 threads.

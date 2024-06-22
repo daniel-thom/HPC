@@ -1,10 +1,10 @@
 #!/bin/bash
 
 CONFIG_DIR=$(pwd)
-CONTAINER_PATH="/datasets/images/apache_spark/spark351_py312.sif"
+CONTAINER_PATH="/datasets/images/apache_spark/spark351_py311.sif"
 CONTAINER_NAME="spark"
 NODE_MEMORY_OVERHEAD_GB=5
-DRIVER_MEMORY_GB=1
+DRIVER_MEMORY_GB=10
 ENABLE_DYNAMIC_ALLOCATION=false
 ENABLE_HISTORY_SERVER=false
 ENABLE_THRIFT_SERVER=false
