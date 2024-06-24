@@ -7,6 +7,7 @@ NODE_MEMORY_OVERHEAD_GB=5
 DRIVER_MEMORY_GB=10
 ENABLE_DYNAMIC_ALLOCATION=false
 ENABLE_HISTORY_SERVER=false
+METASTORE_DIR="."
 ENABLE_THRIFT_SERVER=false
 # Many online docs say executors max out with 5 threads.
 EXECUTOR_CORES=5
@@ -33,6 +34,7 @@ Options:
   -e, --executor-cores INTEGER        Number of cores per executor. [Default: ${EXECUTOR_CORES}]
   -m, --partition-multiplier INTEGER  Set spark.sql.shuffle.partitions to number of
                                       cores multiplied by this value. [Default: ${PARTITION_MULTIPLIER}]
+  -s, --metastore-dir TEXT            Set a custom directory for the metastore and warehouse. [Default: current]
   -t, --thrift-server TEXT            Enable the Thrift server to connect a SQL client. [Default: false]
 
 Example:
@@ -84,6 +86,11 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    -s|--metastore-dir)
+      METASTORE_DIR=$2
+      shift
+      shift
+      ;;
     -t|--thrift-server)
       ENABLE_THRIFT_SERVER=true
       shift
@@ -106,6 +113,9 @@ done
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 set -e
 create_flags=""
+if [[ ${METASTORE_DIR} != "." ]]; then
+    create_flags+=" -s ${METASTORE_DIR}"
+fi
 if [ ${ENABLE_THRIFT_SERVER} = true ]; then
     create_flags+=" -t"
 fi

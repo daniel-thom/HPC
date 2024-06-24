@@ -19,11 +19,9 @@
 
 <configuration>
 
-<!--
 <property>
   <name>javax.jdo.option.ConnectionURL</name>
-  <value>jdbc:derby:;databaseName=/scratch/jdoe/spark/metastore_db;create=true</value>
+  <value>jdbc:derby:;databaseName=REPLACE_ME_WITH_CUSTOM_PATH;create=true</value>
 </property>
--->
 
 </configuration>

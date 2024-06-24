@@ -224,6 +224,13 @@ fi
 
 module load ${CONTAINER_MODULE}
 copy_defaults_template_file
+metastore_dir=$(get_config_variable "metastore_dir")
+if [[ ${metastore_dir} != "." ]]; then
+    cp ${CONFIG_DIR}/conf/hive-site.xml.template ${CONFIG_DIR}/conf/hive-site.xml
+    sed -i "s|REPLACE_ME_WITH_CUSTOM_PATH|${metastore_dir}/metastore_db|" ${CONFIG_DIR}/conf/hive-site.xml
+    echo "spark.sql.warehouse.dir ${metastore_dir}/spark-warehouse" >> ${CONFIG_DIR}/conf/spark-defaults.conf
+fi
+
 config_driver
 config_executors
 if [ ${ENABLE_HISTORY_SERVER} = true ]; then

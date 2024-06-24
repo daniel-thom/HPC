@@ -6,6 +6,7 @@ CONTAINER_PATH="/datasets/images/apache_spark/spark351_py311.sif"
 CONTAINER_NAME="spark"
 DIRECTORY=$(pwd)
 NODE_MEMORY_OVERHEAD_GB="5"
+METASTORE_DIR="."
 ENABLE_THRIFT_SERVER=false
 ARGS=()
 
@@ -20,7 +21,8 @@ Options:
   -d, --directory TEXT                 Base config directory [default: current]
   -o, --node-memory-overhead-gb INTEGER
                                        Memory to reserve for system processes. [Default: ${NODE_MEMORY_OVERHEAD_GB}]
-  -t, --thrift-server TEXT            Enable the Thrift server to connect a SQL client. [Default: false]
+  -s, --metastore-dir TEXT             Set a custom directory for the metastore and warehouse. [Default: current]
+  -t, --thrift-server TEXT             Enable the Thrift server to connect a SQL client. [Default: false]
 
 Example:
   $(basename $0) -c /${HOME}/my_container.sif
@@ -45,6 +47,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     -o|--node-memory-overhead-gb)
       NODE_MEMORY_OVERHEAD_GB=$2
+      shift
+      shift
+      ;;
+    -s|--metastore-dir)
+      METASTORE_DIR=$2
       shift
       shift
       ;;
@@ -92,6 +99,7 @@ CONFIG_FILE="${DIRECTORY}/config"
 echo "container = ${CONTAINER_PATH}" > ${CONFIG_FILE}
 echo "container_instance_name = ${CONTAINER_NAME}" >> ${CONFIG_FILE}
 echo "node_memory_overhead_gb = ${NODE_MEMORY_OVERHEAD_GB}" >> ${CONFIG_FILE}
+echo "metastore_dir = ${METASTORE_DIR}" >> ${CONFIG_FILE}
 echo "thrift_server = ${ENABLE_THRIFT_SERVER}" >> ${CONFIG_FILE}
 
 echo "Created configuration files in ${DIRECTORY}/conf with config file ${CONFIG_FILE}"

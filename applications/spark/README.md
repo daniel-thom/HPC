@@ -6,7 +6,7 @@ The scripts in this directory create ephemeral Apache Spark clusters on HPC comp
 
 [Basic Configuration](#basic-configuration-instructions) | [Advanced Configuration](#advanced-configuration-instructions) | [Run Jobs](#run-jobs)
 
-[Visualize Data with Tableau](#visualize-data-with-tableau)
+[Visualize Data with Tableau](tableau.md)
 
 [Debugging Problems](#debugging-problems) | [Performance Monitoring](#performance-monitoring)
 
@@ -297,140 +297,6 @@ This command will stop the Spark processes and the containers.
 ```
 $ stop_spark_cluster.sh
 ```
-
-## Visualize Data with Tableau
-[Tableau](https://www.tableau.com/) is a nice commercial tool for exploring and visualizing
-tabular data. Licenses are available to NRELians.
-
-In addition to making visualizations, Tableau makes it easy to select, filter, group, and describe
-your data in tables. This can be easier than the same operations in a Python/R/SQL REPL with Spark.
-
-If you have Tableau installed on your laptop, you can connect it to your Spark cluster on Kestrel.
-
-In addition to Tableau, you must install this
-[ODBC driver](https://www.databricks.com/spark/odbc-drivers-download) on your laptop. It may
-require admin priviledges.
-
-### Concepts
-Configuring this workflow has some complexity, and so it is important that you understand what's
-going on.
-
-#### Components
-- Metastore: Created by Spark in your working directory on the Lustre filesystem.
-- Derby database: Manages the metastore. This has an important limitation: only one process can
-access it at a time. (Shared Spark clusters in cloud environments employ a much more sophisticated
-solution.)
-- Thrift Server: Connects SQL clients (like Tableau) to the Spark cluster over the network.
-- Data sources: Parquet/CSV files on the Lustre filesystem.
-- Views: Read-only views into the data sources that get registered in the database.
-
-#### Workflow
-1. Start a Spark cluster.
-2. Create one or more views into your data sources. This will create the metastore in the current
-directory by default.
-3. Start the Thrift Server.
-4. Connect with a SQL client and send queries.
-
-**Warning**: You can cause conflicts in the metastore if you try to run Spark commands from the
-compute node while the Thrift Server is running. Only one process can access the database at a
-time.
-
-### Compute Node Instructions
-1. Acquire one or more compute nodes. The rest of this section assumes that you are logged
-into the head node of the Slurm allocation.
-
-2. Start the Spark cluster.
-   ```
-   $ configure_and_start_spark.sh
-   ```
-
-3. Load the Apptainer environment so that you can run Spark commands inside the container.
-   ```
-   $ module load apptainer
-   ```
-
-4. Create one or more views. These examples show how to create one view on the command line and
-how to create several views in a batch process.
-
-   Suppose that your data sources are located at `/projects/my-project/data`.
-   
-   Create one view. (Note the backslashes that prevent the shell from acting on the backticks.)
-   ```
-   $ apptainer exec instance://spark spark-sql -e \
-       "CREATE VIEW my_view AS SELECT * FROM parquet.\`/projects/my-project/data/table1.parquet\`"
-   ```
-   
-   Create several views.
-   
-   Add lines like these to a text file called `views.txt`:
-   ```
-   CREATE VIEW my_view1 AS SELECT * FROM parquet.`/projects/my-project/data/table1.parquet`"
-   CREATE VIEW my_view2 AS SELECT * FROM parquet.`/projects/my-project/data/table2.parquet`"
-   CREATE VIEW my_view3 AS SELECT * FROM parquet.`/projects/my-project/data/table3.parquet`"
-   ```
-   
-   Execute the commands with `spark-sql`.
-   ```
-   $ apptainer exec instance://spark spark-sql -f views.txt.
-   ```
-
-5. Start the Thrift Server.
-   ```
-   $ apptainer exec instance://spark start-thriftserver.sh spark://$(hostname):7077.
-   ```
-
-   **Warning**: If you need to create more views, you must stop this server to avoid database
-   conflicts.
-   ```
-   $ apptainer exec instance://spark stop-thriftserver.sh
-   ```
-
-### Client-side Instructions
-
-1. Create an ssh tunnel from your laptop to the compute node running the Thrift Server (the
-head node in the Slurm allocation).
-
-   Replace the text below with your compute node and username.
-   ```
-   $ ssh -L 10000:x3000c0s25b0n0:10000 jdoe@kestrel.hpc.nrel.gov
-   ```
-
-2. In Tableau, connect to the Spark cluster as a new data source with the `Spark SQL` connector
-(which was installed above).
-
-### Persistent metastore and spark-warehouse
-The default locations of the metastore and spark-warehouse are in your current working directory.
-You will notice the directories `metastore_db` and `spark-warehouse`.
-
-If you have a set of static tables that you use frequently, you may want to create a persistent
-metastore and spark-warehouse. You can set these locations in the Spark configuration files.
-
-1. Stop your Spark cluster if it is running.
-   ```
-   $ stop_spark_cluster.sh
-   ```
-
-2. Uncomment the `javax.jdo.option.ConnectionURL` property in `conf/hive-site.xml` and change
-`databaseName` to your desired path.
-
-3. If you will create tables, such as with the SQL command `CREATE TABLE` or with the DataFrame
-method `df.write.saveAsTable()`, add this line to `conf/spark-defaults.conf` with your desired
-path:
-   ```
-   spark.sql.warehouse.dir /scratch/jdoe/spark/spark-warehouse
-   ```
-   **Note**: Views do not store data in the warehouse directory.
-
-4. Start your cluster.
-   ```
-   start_spark_cluster.sh
-   ```
-
-   **Note**: You cannot currently use the command `configure_and_start_spark.sh` for this procedure
-   because it will overwrite the config files. You can either (1) run that command, then stop the
-   cluster, edit the files, and start the cluster, or (2) follow the
-   [Advanced Configuration Instructions](#advanced-configuration-instructions)
-
 
 ## Debugging problems
 Open the Spark web UI to observe what's happening with your jobs. You will have to forward ports
