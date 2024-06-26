@@ -52,8 +52,15 @@ fi
 
 function get_memory_gb()
 {
-    memory_kb=$(grep "MemTotal.*kB" /proc/meminfo | awk '{print $2}')
-    memory_gb=$(( ${memory_kb} / (1024 * 1024) ))
+    memory_bytes=$(grep "^[0-9]\+$" /sys/fs/cgroup/memory/slurm/uid_*/job_*/memory.limit_in_bytes)
+    if [ -z ${memory_bytes} ]; then
+        echo "ERROR: Failed to find cgroup memory limit. Fallback to /proc/meminfo"
+        memory_kb=$(grep "MemTotal.*kB" /proc/meminfo | awk '{print $2}')
+        # Subtract 10 GB because that is what Kestrel reserves via Slurm.
+        memory_gb=$(( ${memory_kb} / (1024 * 1024) - 10 ))
+    else
+        memory_gb=$(( ${memory_bytes} / (1024 * 1024 * 1024) ))
+    fi
     echo "${memory_gb}"
 }
 

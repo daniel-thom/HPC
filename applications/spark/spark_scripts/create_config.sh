@@ -5,7 +5,8 @@
 CONTAINER_PATH="/datasets/images/apache_spark/spark351_py311.sif"
 CONTAINER_NAME="spark"
 DIRECTORY=$(pwd)
-NODE_MEMORY_OVERHEAD_GB="5"
+# Spark seems to exceed limits sometimes. Be conservative.
+NODE_MEMORY_OVERHEAD_GB=20
 METASTORE_DIR="."
 ENABLE_THRIFT_SERVER=false
 ARGS=()

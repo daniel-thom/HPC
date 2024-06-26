@@ -14,7 +14,7 @@ function config_executors()
 {
     rm -f ${CONFIG_DIR}/conf/worker_memory ${CONFIG_DIR}/conf/worker_num_cpus
     num_workers=0
-    for node_name in $(${SCRIPT_DIR}/get_node_names.sh ${SLURM_JOB_IDS[@]}); do
+    for node_name in $(cat ${CONFIG_DIR}/conf/workers); do
         if is_worker_node ${node_name}; then
             ssh ${USER}@${node_name} ${SCRIPT_DIR}/record_resources.sh ${CONFIG_DIR}
             ret=$?
@@ -200,6 +200,20 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+function write_worker_nodes()
+{
+    workers_file="${CONFIG_DIR}/conf/workers"
+    rm -f ${workers_file}
+    touch ${workers_file}
+
+    for node in $(${SCRIPT_DIR}/get_node_names.sh ${SLURM_JOB_IDS[@]})
+    do
+        if is_worker_node ${node}; then
+            echo "${node}" >> $workers_file
+        fi
+    done
+}
+
 export SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 . ${SCRIPT_DIR}/common.sh
 
@@ -232,6 +246,7 @@ if [[ ${metastore_dir} != "." ]]; then
 fi
 
 config_driver
+write_worker_nodes
 config_executors
 if [ ${ENABLE_HISTORY_SERVER} = true ]; then
     enable_history_server

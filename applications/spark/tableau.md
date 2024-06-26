@@ -1,5 +1,5 @@
 # Visualize Data with Tableau
-[Tableau](https://www.tableau.com/) is a nice commercial tool for exploring and visualizing
+[Tableau](https://www.tableau.com/) is a commercial tool for exploring and visualizing
 tabular data. Licenses are available to NRELians.
 
 In addition to making visualizations, Tableau makes it easy to select, filter, group, and describe
