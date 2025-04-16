@@ -35,6 +35,11 @@ function config_executors()
     total_num_executors=$(( ${executors_per_node} * ${num_workers} ))
     partitions=$(( ${total_num_cpus} * ${PARTITION_MULTIPLIER} ))
     cat >> ${DEFAULTS_FILE} << EOF
+
+# This causes Spark to follow the Parquet specification when writing timestamps.
+# That in turn allows Pandas and DuckDB to properly interpret the timestamps.
+# Spark's default behavior is to use a commonly-used but non-standard INT96 format.
+spark.sql.parquet.outputTimestampType TIMESTAMP_MICROS
 spark.executor.cores ${EXECUTOR_CORES}
 spark.sql.shuffle.partitions ${partitions}
 spark.executor.memory ${executor_memory_gb}g
