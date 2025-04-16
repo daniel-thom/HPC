@@ -79,9 +79,20 @@ EOF
 function enable_dynamic_allocation() {
     cat >> ${DEFAULTS_FILE} << EOF
 spark.dynamicAllocation.enabled true
-spark.dynamicAllocation.shuffleTracking.enabled true
+
+# Spark documentation says to use either spark.dynamicAllocation.shuffleTracking.enabled
+# or the "decommission" settings below to enable dynamic allocation.
+# We have had more consistent results with the "decommission" option in combination with the
+# executor timeouts below.
+# spark.dynamicAllocation.shuffleTracking.enabled true
+spark.decommission.enabled true
+spark.storage.decommission.shuffleBlocks.enabled true
+
+spark.dynamicAllocation.executorIdleTimeout 60s
+spark.dynamicAllocation.cachedExecutorIdleTimeout 300s
 spark.shuffle.service.enabled true
 spark.shuffle.service.db.enabled = true
+
 spark.worker.cleanup.enabled = true
 EOF
     echo "Enabled dynamic allocation"
