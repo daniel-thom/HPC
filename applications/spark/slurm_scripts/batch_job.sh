@@ -7,6 +7,7 @@
 #SBATCH --nodes=2
 #SBATCH --tmp=1600G
 #SBATCH --partition=debug
+#SBATCH --constraint=lbw
 
 module load apptainer
 SCRIPT_DIR=~/repos/HPC/applications/spark/spark_scripts

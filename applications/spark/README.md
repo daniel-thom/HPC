@@ -57,8 +57,18 @@ consider adding the command to your `~/.bashrc` file.
     ```
 
 ## Compute Nodes
-Consider the type of compute nodes to acquire. If you will be performing large shuffles then
-you should prefer nodes with fast local storage. A minimum requirement is approximately 500 MB/s.
+Consider the type of compute nodes to acquire.
+
+**Warning**: Kestrel has some "high-bandwidth" nodes that are incompatible with Spark.
+If you ask for more than one compute node in your allocation, ensure that you do not get
+them by specifying `-C lbw` (low bandwidth) whenever you allocate nodes. The "high-bandwidth"
+nodes have two network cards (NICs). If Spark could be configured to spread its
+internal network traffic across the NICs, these nodes would be beneficial. As of
+April 2025, however, these nodes result in Spark processes that cannot
+communicate with each other. This may be improved in the future.
+
+If you will be performing large shuffles then you should prefer nodes with fast local
+storage. A minimum requirement is approximately 500 MB/s.
 
 - Any modern SSD should be sufficient.
 - A spinning disk will be too slow.
@@ -98,7 +108,7 @@ with ideal node types. Note that you may want to consider
 [heterogeneous jobs](#heterogeneous-slurm-jobs) and [compute node failures](#compute-node-failures).
 
     ```
-    $ salloc -t 01:00:00 -N2 --account=<your-account> --partition=debug --tmp=1600G --mem=240G
+    $ salloc -t 01:00:00 -N2 --account=<your-account> --partition=debug --tmp=1600G --mem=240G -C lbw
     ```
 
 2. Configure and start the cluster with `configure_and_start_spark.sh`. You can run
@@ -178,7 +188,7 @@ That is where your application will run.
 
 ```
 $ salloc --account=<your-account> -t 01:00:00 -n4 --mem=30G --partition=shared : \
-    -N2 --partition=debug --tmp=1600G --mem=240G
+    -N2 --partition=debug --tmp=1600G --mem=240G -C lbw
 ```
 
 Here is the format of sbatch script:
@@ -196,6 +206,7 @@ Here is the format of sbatch script:
 #SBATCH hetjob
 #SBATCH --nodes=2
 #SBATCH --mem=240G
+#SBATCH --constraint=lbw
 ```
 
 You will need to adjust the CPU and memory parameters based on what you will pass to
