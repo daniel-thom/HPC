@@ -469,16 +469,17 @@ You may want to run performance monitoring for the duration of your job and insp
 later. This section describes one way to do that with a separate tool.
 
 1. Configure a Python virtual environment.
-2. Install `jade`.
+2. Install `rmon`.
 
     ```
-    $ pip install NREL-jade
+    $ pip install rmon
     ```
-    This package includes a tool that collects resource utilization data. You can run it like this:
+    This package installs a CLI tool that collects resource utilization data. You can run it like this:
     ```
-    $ jade stats collect --interval=1 --output=my-stats
+    $ rmon collect --disk --cpu --memory --network --interval=1 --plots --name=stats1 --output=./stats
     ```
-The tool generates a Parquet file for each resource type as well as HTML plots.
+    The tool generates interactive HTML plots for each resource type. Refer to its
+    [documentation](https://github.com/NREL/resource_monitor) for more information.
 
 3. Configure your `sbatch` script to run this tool on each node. Refer to the scripts in
 `slurm_scripts_with_resource_monitoring`. The output directories will contain HTML plots for
