@@ -2,8 +2,8 @@
 
 function setup()
 {
-    if ! [ -d dropbear ]; then
-        apptainer exec ${LUSTRE_BIND_MOUNTS} ${CONTAINER_PATH} ${SCRIPT_DIR}/make_dropbear.sh
+    if ! [ -d ${CONFIG_DIR}/dropbear ]; then
+        apptainer exec ${LUSTRE_BIND_MOUNTS} ${CONTAINER_PATH} ${SCRIPT_DIR}/make_dropbear.sh ${CONFIG_DIR}
     fi
     rm -rf ${CONFIG_DIR}/events && mkdir ${CONFIG_DIR}/events
     rm -rf ${CONFIG_DIR}/logs && mkdir ${CONFIG_DIR}/logs
