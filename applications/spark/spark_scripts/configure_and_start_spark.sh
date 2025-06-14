@@ -97,7 +97,7 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
-    -m|--shuffle-partitions-multiplier)
+    -m|--partition-multiplier)
       PARTITION_MULTIPLIER=${2}
       shift
       shift
