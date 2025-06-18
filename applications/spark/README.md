@@ -72,7 +72,7 @@ storage. A minimum requirement is approximately 500 MB/s.
 
 - Any modern SSD should be sufficient.
 - A spinning disk will be too slow.
-- The Lustre filesystem on Kestrel may be fast enough for most queries. It is ~25% slower than
+- The Lustre filesystem on Kestrel is fast enough for most queries. It is ~25% slower than
 Kestrel SSDs.
 - A RAM drive (`/dev/shm`) will work well for smaller data sizes. Half the node memory is available
 on Kestrel compute nodes.
@@ -87,8 +87,14 @@ you'll need to either add more nodes or use Lustre.
 - Use the option below with salloc/sbatch/srun to get a compute node with SSD local storage.
 
 ```
-$ salloc --tmp=1600G
+$ salloc --partition nvme
 ```
+
+**Warning**: As of June 2025, Kestrel rejects requests for low-bandwith nodes with local storage
+(`salloc -C lbw --partition nvme`).
+Unless this changes, the only way to get local storage may be to use bigmem or gpu nodes.
+The scripts now default to using the current directory (Lustre) for shuffle data.
+
 Refer to the [Kestrel documentation](https://www.nrel.gov/hpc/kestrel-system-configuration.html)
 for more information.
 
@@ -108,7 +114,7 @@ with ideal node types. Note that you may want to consider
 [heterogeneous jobs](#heterogeneous-slurm-jobs) and [compute node failures](#compute-node-failures).
 
     ```
-    $ salloc -t 01:00:00 -N2 --account=<your-account> --partition=debug --tmp=1600G --mem=240G -C lbw
+    $ salloc -t 01:00:00 -N2 --account=<your-account> --partition=debug --mem=240G -C lbw
     ```
 
 2. Configure and start the cluster with `configure_and_start_spark.sh`. You can run
@@ -188,7 +194,7 @@ That is where your application will run.
 
 ```
 $ salloc --account=<your-account> -t 01:00:00 -n4 --mem=30G --partition=shared : \
-    -N2 --partition=debug --tmp=1600G --mem=240G -C lbw
+    -N2 --partition=debug --mem=240G -C lbw
 ```
 
 Here is the format of sbatch script:
@@ -287,9 +293,7 @@ Here are some parameters in the `conf` files to consider editing:
    memory. Adjust other parameters accordingly. If on Kestrel, you may be able to set it to a
    directory on the Lustre filesystem.
    - `SPARK_WORKER_DIR`: The Spark worker processes will log to this directory
-     and use it for scratch space. It is configured to go to `$TMPDIR` by default. Change it
-     or copy the files before relinquishing the nodes if you want to preserve the files. They can
-     be useful for debugging errors.
+   and use it for scratch space. The stdout/stderr files can be useful for debugging errors.
 
 **spark-defaults.conf**:
    - `spark.executor.cores`: Online recommendations say that there is minimal parallelization

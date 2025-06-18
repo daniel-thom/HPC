@@ -8,7 +8,8 @@ ENABLE_HISTORY_SERVER=false
 EXECUTOR_CORES=5
 PARTITION_MULTIPLIER=1
 SLURM_JOB_IDS=()
-SPARK_SCRATCH="tmpfs"
+SPARK_SCRATCH="spark_scratch"
+USE_LOCAL_STORAGE=false
 
 # Configure executor settings in spark-defaults.conf.
 function config_executors()
@@ -131,8 +132,10 @@ Options:
   -M, --driver-memory-gb INTEGER      Driver memory in GB. [Default: ${DRIVER_MEMORY_GB}]
   -e, --executor-cores INTEGER        Number of cores per executor. [Default: ${EXECUTOR_CORES}]
   -d, --directory TEXT                Base directory with configuration files. [Default: current]
-  -l, --spark-scratch TEXT            Directory given to Spark workers for shuffle writes and log files.
-                                      [Default: compute node tmpfs]
+  -l, --spark-scratch TEXT            Directory given to Spark workers for shuffle writes.
+                                      [Default: ./spark_scratch]
+  -L, --local-storage                 Use compute nodes' local storage for shuffle writes. [Default: false]
+                                      Overrides -l/--spark-scratch.
   -m, --partition-multiplier INTEGER  Set spark.sql.shuffle.partitions to number of
                                       cores multiplied by this value. [Default: ${PARTITION_MULTIPLIER}]
 
@@ -148,6 +151,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -H|--history-server)
       ENABLE_HISTORY_SERVER=true
+      shift
+      ;;
+    -L|--local-storage)
+      USE_LOCAL_STORAGE=true
       shift
       ;;
     -M|--driver-memory-gb)
@@ -263,11 +270,14 @@ else
         echo "spark.executor.extraClassPath /datasets/images/apache_spark/postgresql-42.7.4.jar" >> ${DEFAULTS_FILE}
     fi
 fi
-if [ "${SPARK_SCRATCH}" != "tmpfs" ]; then
+if ${USE_LOCAL_STORAGE}; then
+    echo "Configured Spark workers to use local storage for shuffle data."
+else
     spark_scratch=$(realpath ${SPARK_SCRATCH})
     echo "SPARK_LOCAL_DIRS=${spark_scratch}/local" >> ${CONFIG_DIR}/conf/spark-env.sh
     echo "SPARK_WORKER_DIR=${spark_scratch}/worker" >> ${CONFIG_DIR}/conf/spark-env.sh
-    echo "Configured Spark workers to use ${spark_scratch} for shuffle data and log files."
+    echo "Configured Spark workers to use ${spark_scratch} for shuffle data."
 fi
 
+echo "SPARK_LOG_DIR=${CONFIG_DIR}/logs" >> ${CONFIG_DIR}/conf/spark-env.sh
 echo "Configured settings in ${DEFAULTS_FILE}"

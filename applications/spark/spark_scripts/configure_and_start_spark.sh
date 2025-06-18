@@ -16,7 +16,8 @@ ENABLE_THRIFT_SERVER=false
 EXECUTOR_CORES=5
 PARTITION_MULTIPLIER=1
 SLURM_JOB_IDS=()
-SPARK_SCRATCH="tmpfs"
+SPARK_SCRATCH="spark_scratch"
+USE_LOCAL_STORAGE=false
 
 # Main
 
@@ -37,7 +38,10 @@ Options:
   -M, --driver-memory-gb INTEGER      Driver memory in GB. [Default: ${DRIVER_MEMORY_GB}]
   -e, --executor-cores INTEGER        Number of cores per executor. [Default: ${EXECUTOR_CORES}]
   -l, --spark-scratch TEXT            Directory given to Spark workers for shuffle writes and log files.
-                                      [Default: compute node tmpfs]
+                                      Specify 'local_storage' to use compute nodes' local storage.
+                                      [Default: ./spark_scratch]
+  -L, --local-storage                 Use compute nodes' local storage for shuffle writes. [Default: false]
+                                      Overrides -l/--spark-scratch.
   -m, --partition-multiplier INTEGER  Set spark.sql.shuffle.partitions to number of
                                       cores multiplied by this value. [Default: ${PARTITION_MULTIPLIER}]
   -S, --hive-metastore                Create a Hive metastore with Spark defaults (Apache Derby).
@@ -80,6 +84,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -H|--history-server)
       ENABLE_HISTORY_SERVER=true
+      shift
+      ;;
+    -L|--local-storage)
+      USE_LOCAL_STORAGE=true
       shift
       ;;
     -M|--driver-memory-gb)
@@ -173,6 +181,9 @@ else
 fi
 if ${ENABLE_HISTORY_SERVER}; then
     flags+=" -H"
+fi
+if ${USE_LOCAL_STORAGE}; then
+    flags+=" -L"
 fi
 
 bash ${script_dir}/configure_spark.sh \
