@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CONFIG_DIR=$(pwd)
-CONTAINER_PATH="/datasets/images/apache_spark/spark354_py311.sif"
+CONTAINER_PATH="/datasets/images/apache_spark/spark400_py311.sif"
 CONTAINER_NAME="spark"
 NODE_MEMORY_OVERHEAD_GB=10
 DRIVER_MEMORY_GB=10

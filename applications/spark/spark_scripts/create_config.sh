@@ -2,7 +2,7 @@
 
 # Creates the base config file and copies the Spark configuration files to the user's directory.
 
-CONTAINER_PATH="/datasets/images/apache_spark/spark354_py311.sif"
+CONTAINER_PATH="/datasets/images/apache_spark/spark400_py311.sif"
 CONTAINER_NAME="spark"
 DIRECTORY=$(pwd)
 NODE_MEMORY_OVERHEAD_GB=10
